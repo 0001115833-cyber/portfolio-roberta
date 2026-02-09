@@ -1,0 +1,54 @@
+name: CI-Portfolio
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check index.html exists
+        run: |
+          if [ ! -f index.html ]; then
+            echo "index.html não encontrado"
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install htmlhint
+        run: npm install -g htmlhint
+
+      - name: Run HTML linter
+        run: htmlhint index.html
+
+      - name: Block large files
+        run: |
+          if find . -type f -size +500k | grep .; then
+            echo "Arquivo maior que 500KB encontrado"
+            exit 1
+          fi
+
+      - name: Scan forbidden words
+        run: |
+          if grep -RiE "TODO|FIXME|senha|password" .; then
+            echo "Texto proibido encontrado"
+            exit 1
+          fi
+
+      - name: Check links and images
+        run: |
+          npm install -g linkinator
+          linkinator index.html --skip mailto:
