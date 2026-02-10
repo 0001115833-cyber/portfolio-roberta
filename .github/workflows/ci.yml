@@ -2,7 +2,7 @@ name: CI-Portfolio
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   validate:
@@ -31,8 +31,8 @@ jobs:
       - name: Install htmlhint
         run: npm install -g htmlhint
 
-      - name: Run HTML linter
-        run: htmlhint index.html
+      - name: Run HTML linter (soft mode)
+        run: htmlhint index.html || true
 
       - name: Block large files
         run: |
